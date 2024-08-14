@@ -37,8 +37,7 @@ export function RoomUsers({
           <li
             key={user.userId}
             className={clsx(
-              "bg-slate-300",
-              user.userId === currentUserId && "bg-red-300",
+              user.userId === currentUserId ? "bg-red-200" : "bg-slate-300",
             )}
           >
             {user.userId}
