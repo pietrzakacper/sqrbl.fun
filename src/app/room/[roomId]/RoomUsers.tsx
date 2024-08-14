@@ -18,15 +18,16 @@ export function RoomUsers({
   const [users, setUsers] = useState(initialUsers);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const { users: newUsers } = await getRoomWithUsers({ roomId });
-      setUsers(newUsers);
+    const interval = setInterval(() => {
+      void getRoomWithUsers({ roomId }).then((room) => {
+        setUsers(room.users);
+      });
     }, ROOM_REFRESH_INTERVAL);
 
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [roomId]);
 
   return (
     <>
@@ -37,7 +38,7 @@ export function RoomUsers({
             key={user.userId}
             className={clsx(
               "bg-slate-300",
-              user.userId === currentUserId && "bg-red-200",
+              user.userId === currentUserId && "bg-red-300",
             )}
           >
             {user.userId}
