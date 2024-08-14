@@ -10,11 +10,18 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
+model Room {
+    id        String   @id @default(uuid())
     createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
 
-    @@index([name])
+    users RoomUser[]
+}
+
+model RoomUser {
+    roomId String
+    userId String
+
+    room Room @relation(fields: [roomId], references: [id])
+
+    @@id([roomId, userId])
 }
