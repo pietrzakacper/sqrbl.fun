@@ -2,7 +2,7 @@ import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
-
+import ReactQueryProvider from "./react-query-provider";
 export const metadata: Metadata = {
   title: "sqrbl.fun",
   description: "Play sqrbl.fun with your friends!",
@@ -14,7 +14,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body>{children}</body>
+      <ReactQueryProvider>
+        <body>{children}</body>
+      </ReactQueryProvider>
     </html>
   );
 }

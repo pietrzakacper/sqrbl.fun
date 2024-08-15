@@ -22,6 +22,15 @@ model RoomUser {
     userId String
 
     room Room @relation(fields: [roomId], references: [id])
+    user User @relation(fields: [userId], references: [id])
 
     @@id([roomId, userId])
+}
+
+model User {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    name      String
+
+    rooms RoomUser[]
 }
