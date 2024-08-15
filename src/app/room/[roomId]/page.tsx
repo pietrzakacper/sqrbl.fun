@@ -1,14 +1,21 @@
 "use client";
 
-import { useRef } from "react";
-import { joinRoom } from "./actions";
+import { useEffect, useRef, useState } from "react";
+import { getUser, joinRoom } from "./actions";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRoomUsers } from "./actions";
 import { RoomUsers } from "./RoomUsers";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 
 const ROOM_REFRESH_INTERVAL = 2000;
 
 export default function Page({ params }: { params: { roomId: string } }) {
+  const currentUserQuery = useQuery({
+    queryKey: ["user"],
+    queryFn: () => getUser(),
+  });
+
   const usersQuery = useQuery({
     queryKey: ["room", { roomId: params.roomId }],
     queryFn: () => getRoomUsers({ roomId: params.roomId }),
@@ -24,6 +31,20 @@ export default function Page({ params }: { params: { roomId: string } }) {
     },
   });
 
+  const [userAutoAdded, setUserAutoAdded] = useState(false);
+
+  useEffect(() => {
+    if (userAutoAdded) return;
+    if (!currentUserQuery.data || currentUserQuery.isLoading) return;
+    if (!usersQuery.data || usersQuery.isLoading) return;
+    if (usersQuery.data.find((u) => u.id === currentUserQuery.data?.id)) return;
+
+    if (currentUserQuery.data.name) {
+      setUserAutoAdded(true);
+      joinRoomMutation.mutate(currentUserQuery.data.name);
+    }
+  }, [currentUserQuery, usersQuery, joinRoomMutation, userAutoAdded]);
+
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   if (usersQuery.isLoading) {
@@ -32,10 +53,14 @@ export default function Page({ params }: { params: { roomId: string } }) {
 
   return (
     <main className="flex h-screen w-1/2 flex-col justify-start">
-      <div className="flex justify-center p-10">
-        <div>Choose your username:</div>
-        <input
+      <div className="pb-10 pt-10">
+        <Label htmlFor="username">your player name:</Label>
+        <Input
+          id="username"
           type="text"
+          maxLength={40}
+          className="w-52"
+          defaultValue={currentUserQuery.data?.name}
           onChange={(e) => {
             if (e.target.value === "") return;
             clearTimeout(timeoutRef.current);
@@ -46,7 +71,7 @@ export default function Page({ params }: { params: { roomId: string } }) {
         />
       </div>
       <RoomUsers
-        currentUserId={joinRoomMutation.data?.currentUserId}
+        currentUserId={currentUserQuery.data?.id}
         users={usersQuery.data ?? []}
       />
     </main>

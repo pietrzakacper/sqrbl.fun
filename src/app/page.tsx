@@ -1,10 +1,11 @@
+import { Button } from "~/components/ui/button";
 import { createRoom } from "./create-room";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-black">
+    <main className="">
       <form action={createRoom}>
-        <button className="bg-white p-4 text-black">Create new room</button>
+        <Button type="submit">create new game</Button>
       </form>
     </main>
   );
