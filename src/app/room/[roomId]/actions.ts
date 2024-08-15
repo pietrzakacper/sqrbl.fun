@@ -49,6 +49,10 @@ export async function getRoomUsers({ roomId }: { roomId: string }) {
   return db.user.findMany({ where: { rooms: { some: { roomId } } } });
 }
 
+export async function getRoom({ roomId }: { roomId: string }) {
+  return db.room.findFirst({ where: { id: roomId } });
+}
+
 export async function getUser() {
   const userId = cookies().get("userId")?.value;
 
