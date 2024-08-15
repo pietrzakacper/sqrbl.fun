@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
 import { joinRoom } from "./actions";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getRoomUsers } from "./actions";
@@ -9,8 +9,6 @@ import { RoomUsers } from "./RoomUsers";
 const ROOM_REFRESH_INTERVAL = 2000;
 
 export default function Page({ params }: { params: { roomId: string } }) {
-  const [username, setUsername] = useState("");
-
   const usersQuery = useQuery({
     queryKey: ["room", { roomId: params.roomId }],
     queryFn: () => getRoomUsers({ roomId: params.roomId }),
@@ -19,31 +17,38 @@ export default function Page({ params }: { params: { roomId: string } }) {
 
   const joinRoomMutation = useMutation({
     mutationKey: ["room", { roomId: params.roomId }],
-    mutationFn: () => joinRoom({ roomId: params.roomId, username }),
+    mutationFn: (username: string) =>
+      joinRoom({ roomId: params.roomId, username }),
     onSuccess: () => {
       void usersQuery.refetch();
     },
   });
+
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   if (usersQuery.isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <>
-      <div>Room</div>
-      <form onSubmit={(e) => (e.preventDefault(), joinRoomMutation.mutate())}>
-        Choose your username:
+    <main className="flex h-screen w-1/2 flex-col justify-start">
+      <div className="flex justify-center p-10">
+        <div>Choose your username:</div>
         <input
           type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value === "") return;
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => {
+              joinRoomMutation.mutate(e.target.value);
+            }, 200);
+          }}
         />
-      </form>
+      </div>
       <RoomUsers
         currentUserId={joinRoomMutation.data?.currentUserId}
         users={usersQuery.data ?? []}
       />
-    </>
+    </main>
   );
 }

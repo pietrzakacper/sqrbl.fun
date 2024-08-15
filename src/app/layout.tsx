@@ -15,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <ReactQueryProvider>
-        <body>{children}</body>
+        <body className="flex min-h-screen flex-col items-center justify-center bg-black">
+          {children}
+        </body>
       </ReactQueryProvider>
     </html>
   );
